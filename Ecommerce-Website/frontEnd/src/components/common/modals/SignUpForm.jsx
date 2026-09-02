@@ -44,6 +44,7 @@ const SignUpForm = () => {
     password: "",
     confirmPassword: "",
   });
+
   const { closeModal } = useUserAuthModal();
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -167,8 +168,10 @@ const SignUpForm = () => {
     };
 
     setIsLoading(true);
+
     try {
       const message = await signupUser(userData);
+
       setSuccessMsg("Signup successful! You can now log in.");
 
       setForm({
@@ -204,8 +207,9 @@ const SignUpForm = () => {
   return (
     <div className="inner">
       <div className="image-holder">
-        <video src="../../public/signUp.mov" loop muted autoPlay />
+        <video src="/signUp.mov" loop muted autoPlay />
       </div>
+
       <form onSubmit={handleSubmit}>
         <h3>SignUp Form</h3>
 
@@ -219,6 +223,7 @@ const SignUpForm = () => {
             onChange={handleChange}
             required
           />
+
           <input
             type="text"
             name="lastName"
@@ -284,6 +289,7 @@ const SignUpForm = () => {
             />
             <FontAwesomeIcon icon={faLocationDot} />
           </div>
+
           <div className="form-wrapper">
             <input
               type="text"
@@ -312,8 +318,10 @@ const SignUpForm = () => {
               <option value="Male">Male</option>
               <option value="Female">Female</option>
             </select>
+
             <FontAwesomeIcon icon={faCaretDown} />
           </div>
+
           <div className="form-wrapper birthdate">
             <DatePicker
               selected={form.birthDate}
@@ -356,6 +364,7 @@ const SignUpForm = () => {
             />
             <FontAwesomeIcon icon={faHouseFlag} />
           </div>
+
           <div className="form-wrapper">
             <input
               type="text"
@@ -368,6 +377,7 @@ const SignUpForm = () => {
             />
             <FontAwesomeIcon icon={faTreeCity} />
           </div>
+
           <div className="form-wrapper">
             <input
               type="text"

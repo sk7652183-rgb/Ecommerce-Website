@@ -1,27 +1,33 @@
 @font-face {
   font-family: "BebasNeue";
-  src: url("../../../../public/fonts/BebasNeue-Regular.ttf");
+  src: url("/fonts/BebasNeue-Regular.ttf") format("truetype");
 }
+
 @font-face {
   font-family: "Roboto";
-  src: url("../../../../public/fonts/Roboto-VariableFont_wdth,wght.ttf");
+  src: url("/fonts/Roboto-VariableFont_wdth,wght.ttf") format("truetype");
 }
+
 @font-face {
   font-family: "JosefinSans";
-  src: url("../../../public/fonts/JosefinSans-VariableFont_wght.ttf");
+  src: url("/fonts/JosefinSans-VariableFont_wght.ttf") format("truetype");
 }
+
 @font-face {
   font-family: "Cabin";
-  src: url("../../../public/fonts/Cabin-VariableFont_wdth,wght.ttf");
+  src: url("/fonts/Cabin-VariableFont_wdth,wght.ttf") format("truetype");
 }
+
 @font-face {
   font-family: "Boldonse";
-  src: url("../../../public/fonts/Boldonse-Regular.ttf");
+  src: url("/fonts/Boldonse-Regular.ttf") format("truetype");
 }
+
 @font-face {
   font-family: "Lexend";
-  src: url("../../../public/fonts/Lexend-VariableFont_wght.ttf");
+  src: url("/fonts/Lexend-VariableFont_wght.ttf") format("truetype");
 }
+
 :root {
   --primary-color: #e8eae5;
   --identity-color: #035a52;
@@ -34,18 +40,21 @@
 
   font-size: 13px;
 }
+
 * {
   box-sizing: border-box;
   font-family: Cabin, Roboto, JosefinSans, Arial, Helvetica, sans-serif;
   scrollbar-width: thin;
 }
+
 h2 {
   font-size: 1.5rem;
 }
 
-a{
+a {
   color: var(--identity-color);
 }
+
 a:hover {
   text-decoration: none;
 }
@@ -66,12 +75,15 @@ button {
   cursor: pointer;
   transition: box-shadow 0.2s ease;
 }
+
 button:hover {
-  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+  box-shadow:
+    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
     rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
   background-color: var(--black-color);
   color: white;
 }
+
 body {
   min-height: 100vh;
   margin: 0;
@@ -90,7 +102,8 @@ header {
   font-weight: 600;
   padding: 20px 90px 10px 90px;
   text-align: center;
-  box-shadow: rgba(50, 50, 105, 0.15) 0px 2px 5px 0px,
+  box-shadow:
+    rgba(50, 50, 105, 0.15) 0px 2px 5px 0px,
     rgba(0, 0, 0, 0.05) 0px 1px 1px 0px;
   background-color: #fcfaee;
 }
