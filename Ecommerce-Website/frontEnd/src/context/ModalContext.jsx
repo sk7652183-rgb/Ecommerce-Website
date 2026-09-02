@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import ConfirmModal from "../components/common/ConfirmModal";
-import ErrorModal from "../components/common/errorModal";
+import ErrorModal from "../components/common/ErrorModal";
 
 const ModalContext = createContext();
 
