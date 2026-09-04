@@ -20,16 +20,16 @@ import bottomSizeChart from "../../../assets/bottom-size-chart.webp";
 import shoesSizeChart from "../../../assets/shoes-size-chart.webp";
 
 import "../../../styles/customer/component-styles/shops/ProductWindow.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // Load product details.
 function ProductWindow({ product, setShowState, showEdit = () => {} }) {
   const { isLoggedIn, role } = useAuth();
   const { addToCart } = useCart();
-  // const [size, setSize] = useState(null);
+  const navigate = useNavigate();
+
   const [option, setOption] = useState(null);
   const [selectedImageIndex, setSelectedIndex] = useState(0);
-
   const [reviews, setReviews] = useState({});
 
   useEffect(() => {
@@ -41,6 +41,7 @@ function ProductWindow({ product, setShowState, showEdit = () => {} }) {
         console.error("Error Fetching reviews: ", error.message);
       }
     }
+
     fetchAllReviews();
   }, [product.asin]);
 
@@ -55,80 +56,60 @@ function ProductWindow({ product, setShowState, showEdit = () => {} }) {
       return null;
     }
   }
-  // function handleApparelSize() {
-  //   return product.categories.includes("apparel") ? (
-  //     <div className="selection size">
-  //       <h4>Size Selections</h4>
-  //       <div className="selection-container">
-  //         {[
-  //           "XX-Small",
-  //           "X-Small",
-  //           "Small",
-  //           "Medium",
-  //           "Large",
-  //           "X-Large",
-  //           "XX-Large",
-  //         ].map((sizing) => (
-  //           <div
-  //             key={sizing}
-  //             className={sizing === size ? "selected" : ""}
-  //             onClick={() => setSize(sizing)}
-  //           >
-  //             {sizing}
-  //           </div>
-  //         ))}
-  //       </div>
-  //     </div>
-  //   ) : null;
-  // }
-  // function handleShoesSize() {
-  //   return product.categories.includes("footwear") ? (
-  //     <div className="selection shoes-size">
-  //       <h4>Size Selections</h4>
-  //       <div className="selection-container">
-  //         {["44", "45", "48", "50", "52", "55", "57"].map((sizing) => (
-  //           <div
-  //             key={sizing}
-  //             className={sizing === size ? "selected" : ""}
-  //             onClick={() => setSize(sizing)}
-  //           >
-  //             {sizing}
-  //           </div>
-  //         ))}
-  //       </div>
-  //     </div>
-  //   ) : null;
 
   function validAddToCart() {
-    //if (product.variations && !option) {
-    //window.alert("Please select an option");
-    //return false;
-    //}
+    /*
+    If you want to force variation selection later, you can enable this:
+
+    if (product.variations && !option) {
+      window.alert("Please select an option");
+      return false;
+    }
+    */
+
     return true;
   }
-  function handleSubmission(event) {
+
+  // Add product to cart and then navigate to checkout
+  async function handleSubmission(event) {
     event.preventDefault();
-    if (validAddToCart()) {
-      addToCart({
+
+    if (!validAddToCart()) {
+      return;
+    }
+
+    try {
+      const result = await addToCart({
         id: product.asin + (option ? `-${option}` : ""),
         asin: product.asin,
         name: product.title,
-        priceCents: product.price, // or product.final_price if that's correct
+        priceCents: product.price,
         currency: product.currency,
         image: product.image,
         option: option,
-        // add any other fields needed by the checkout
       });
-      //setShowState(false);
+
+      console.log("Product added to cart:", result);
+
+      // Close product window
+      setShowState(false);
+
+      // Navigate to checkout after cart update succeeds
+      navigate("/check-out");
+    } catch (error) {
+      console.error("Failed to add product to cart:", error);
     }
   }
+
   function ratingPhotoManage(rating) {
     const ratingPhoto = rating * 10;
+
     if (ratingPhoto > 0 && ratingPhoto < 10) return 5;
     else if (ratingPhoto > 10 && ratingPhoto < 20) return 15;
     else if (ratingPhoto > 20 && ratingPhoto < 30) return 25;
     else if (ratingPhoto > 30 && ratingPhoto < 40) return 35;
     else if (ratingPhoto > 40 && ratingPhoto < 50) return 45;
+
     return ratingPhoto;
   }
 
@@ -138,7 +119,9 @@ function ProductWindow({ product, setShowState, showEdit = () => {} }) {
         setShowState(false);
       }
     };
+
     window.addEventListener("click", handleClick);
+
     return () => window.removeEventListener("click", handleClick);
   }, [setShowState]);
 
@@ -146,8 +129,12 @@ function ProductWindow({ product, setShowState, showEdit = () => {} }) {
     <div className="overlay">
       <form className="product-window" onSubmit={handleSubmission}>
         <div className="head">
-          <FontAwesomeIcon icon={faMinus} onClick={() => setShowState(false)} />
+          <FontAwesomeIcon
+            icon={faMinus}
+            onClick={() => setShowState(false)}
+          />
         </div>
+
         <div className="bottom">
           <div className="image-holder">
             {product.images.length > 1 ? (
@@ -168,12 +155,17 @@ function ProductWindow({ product, setShowState, showEdit = () => {} }) {
             <div className="top">
               <div className="product-title">
                 <h2>{product.title}</h2>
+
                 <p className="product-categories">
                   {product.categories.join(" | ")}
                 </p>
+
                 {product.departments && (
-                  <p className="product-departments">{product.departments}</p>
+                  <p className="product-departments">
+                    {product.departments}
+                  </p>
                 )}
+
                 <div className="product-rating">
                   {[...Array(5)].map((_, i) => (
                     <FontAwesomeIcon
@@ -187,25 +179,40 @@ function ProductWindow({ product, setShowState, showEdit = () => {} }) {
                       }}
                     />
                   ))}
-                  <p style={{ display: "inline", marginLeft: 8 }}>
+
+                  <p
+                    style={{
+                      display: "inline",
+                      marginLeft: 8,
+                    }}
+                  >
                     {product.rating} <span>({product.sold})</span>
                   </p>
                 </div>
+
                 <p>
                   Sell By{" "}
-                  <span className="sellerId">{`(${product.sellerId})`} </span>
+                  <span className="sellerId">
+                    {`(${product.sellerId})`}{" "}
+                  </span>
+
                   <Link to={`/sellerShop/${product.sellerId}`}>
                     {product.seller_name}
                   </Link>
                 </p>
               </div>
+
               {isLoggedIn && (
                 <>
                   {role === "customer" && (
-                    <button className="addToCart-btn" type="submit">
+                    <button
+                      className="addToCart-btn"
+                      type="submit"
+                    >
                       Add to Cart
                     </button>
                   )}
+
                   {role === "seller" && (
                     <button
                       className="editProduct-btn"
@@ -224,24 +231,19 @@ function ProductWindow({ product, setShowState, showEdit = () => {} }) {
               {product.discount ? `(${product.discount})` : null}
             </div>
 
-            {/* 
-            //Size selection for apparel (eg. shirts, pants,...)
-            {handleApparelSize()}
-
-            //Shoes Size selection for shoes
-            {/* {handleShoesSize()}
-            */}
-
-            {/*Options for products with variations*/}
+            {/* Options for products with variations */}
             {product.variations?.length > 0 && (
               <div className="selection choice">
                 <h4>Choice Selections</h4>
+
                 <div className="selection-container">
-                  {product.variations?.map((optionItem, index) => (
+                  {product.variations.map((optionItem, index) => (
                     <div
                       key={optionItem.asin}
                       className={
-                        optionItem.asin === option?.asin ? "selected" : ""
+                        optionItem.asin === option?.asin
+                          ? "selected"
+                          : ""
                       }
                       onClick={() => {
                         setOption(optionItem);
@@ -257,17 +259,17 @@ function ProductWindow({ product, setShowState, showEdit = () => {} }) {
 
             <div className="product-details">
               <h4>Details</h4>
+
               <div className="product-source">
                 {product.badge && (
                   <p className="product-badge">
                     {product.badge?.trim()}{" "}
                     <span>
                       {product.badge?.toLowerCase().trim() ===
-                        "amazon's choice" ||
-                        (product.badge?.toLowerCase().trim() ===
-                          "amazon's  choice" && (
-                          <FontAwesomeIcon icon={faMedal} />
-                        ))}
+                        "amazon's choice" && (
+                        <FontAwesomeIcon icon={faMedal} />
+                      )}
+
                       {product.badge?.toLowerCase().trim() ===
                         "best seller" && (
                         <FontAwesomeIcon icon={faWebAwesome} />
@@ -275,56 +277,76 @@ function ProductWindow({ product, setShowState, showEdit = () => {} }) {
                     </span>
                   </p>
                 )}
+
                 <p
                   className={`product-availability ${
                     product.availability
-                      ? product.availability.toLowerCase() !== "in stock" &&
+                      ? product.availability.toLowerCase() !==
+                          "in stock" &&
                         "availability-warning"
                       : "not-available"
                   }`}
                 >
                   {product.availability}
                 </p>
+
                 <p>
-                  Rank in all category <span>{product.root_bs_rank}</span>
+                  Rank in all category{" "}
+                  <span>{product.root_bs_rank}</span>
                 </p>
+
                 {product.bs_rank && (
                   <p>
-                    Best Selling Rank <span>{product.bs_rank}</span>
+                    Best Selling Rank{" "}
+                    <span>{product.bs_rank}</span>
                   </p>
                 )}
+
                 {product.subcategory_rank &&
                   product.subcategory_rank.map((category) => (
-                    <p>
+                    <p key={category.subcategory_name}>
                       Rank in {category.subcategory_name}
                       <span> {category.subcategory_rank}</span>
                     </p>
                   ))}
+
                 <p>
-                  Model Number <span>{product.model_number}</span>
+                  Model Number{" "}
+                  <span>{product.model_number}</span>
                 </p>
+
                 <p>
                   Brand <span>{product.brand}</span>
                 </p>
+
                 <p>
-                  Manufacturer <span>{product.manufacturer}</span>
+                  Manufacturer{" "}
+                  <span>{product.manufacturer}</span>
                 </p>
+
                 {product.weight && (
                   <p>
                     Weight <span>{product.weight}</span>
                   </p>
                 )}
+
                 <p>
                   Dimension <span>{product.dimension}</span>
                 </p>
+
                 {product.ingredients && (
                   <p>
-                    Ingredients <span>{product.ingredients}</span>
+                    Ingredients{" "}
+                    <span>{product.ingredients}</span>
                   </p>
                 )}
+
                 <p>
                   Date first available
-                  <span> {product.date_first_available || "NO RECORD"}</span>
+                  <span>
+                    {" "}
+                    {product.date_first_available || "NO RECORD"}
+                  </span>
                 </p>
               </div>
             </div>
@@ -333,7 +355,9 @@ function ProductWindow({ product, setShowState, showEdit = () => {} }) {
             product.categories.includes("footwear") ? (
               <div className="size-chart-container">
                 <h4>Size Guide</h4>
-                <div className="chart-holder">{imageSizeChart()}</div>
+                <div className="chart-holder">
+                  {imageSizeChart()}
+                </div>
               </div>
             ) : null}
 
@@ -341,21 +365,23 @@ function ProductWindow({ product, setShowState, showEdit = () => {} }) {
               <h4>Description</h4>
               <p>{product.description}</p>
             </div>
-            {Array.isArray(product.features) && product.features.length > 0 && (
-              <div className="product-features">
-                <h4>Features</h4>
-                <ul>
-                  {product.features.map((feature, idx) => (
-                    <li key={idx}>{feature}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+
+            {Array.isArray(product.features) &&
+              product.features.length > 0 && (
+                <div className="product-features">
+                  <h4>Features</h4>
+
+                  <ul>
+                    {product.features.map((feature, idx) => (
+                      <li key={idx}>{feature}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
             <div className="product-reviews-container">
               <h4>Review(s)</h4>
 
-              {/* //TODO: The Top review first */}
               <ProductReview
                 userProfile="https://t3.ftcdn.net/jpg/06/25/95/40/360_F_625954075_LA8kZtScb8QrJtG0JTBv3FZ9wTgXURKY.jpg"
                 username="Top Review"
@@ -365,28 +391,33 @@ function ProductWindow({ product, setShowState, showEdit = () => {} }) {
                 pin={true}
               />
 
-              {/* //TODO: The rest reviews, just map it*/}
               {reviews.customer_review?.map((rev) => (
                 <ProductReview
+                  key={"review-" + rev.review_id}
                   userProfile={
                     rev.customer?.profile_picture ||
                     "https://cdn-icons-png.flaticon.com/512/9187/9187604.png"
                   }
                   createAt={rev.created_at}
-                  username={`${rev.customer?.first_name} ${rev.customer?.last_name}`}
+                  username={`${rev.customer?.first_name || ""} ${
+                    rev.customer?.last_name || ""
+                  }`}
                   description={rev.comment}
                   reviewId={"review-" + rev.review_id}
                 />
               ))}
 
-              {/* //NOTE: Only the customer who have bought this product can give the review, so modify it*/}
               {role === "customer" && (
                 <form className="add-comment">
                   <input
                     type="text"
                     placeholder="What's your thought about this product?"
                   />
-                  <button className="post-comment" type="submit">
+
+                  <button
+                    className="post-comment"
+                    type="submit"
+                  >
                     <FontAwesomeIcon icon={faPaperPlane} />
                   </button>
                 </form>
@@ -410,32 +441,37 @@ function ProductReview({
   pin = false,
 }) {
   const { role } = useAuth();
+
   return (
     <div
-      className={pin ? `product-review pin` : `product-review`}
+      className={pin ? "product-review pin" : "product-review"}
       key={`review-${reviewId}`}
     >
       <div className="header">
         <div className="review-info">
           <div className="profile-image">
-            <img src={userProfile} />
+            <img src={userProfile} alt="reviewer profile" />
           </div>
+
           <div>
             <h2>{username}</h2>
             <p>{createAt}</p>
           </div>
         </div>
+
         {role === "seller" && (
           <div className="review-action">
             <div className="pin-review">
               <FontAwesomeIcon icon={faStar} />
             </div>
+
             <div className="delete-review">
               <FontAwesomeIcon icon={faTrash} />
             </div>
           </div>
         )}
       </div>
+
       <p>{description}</p>
     </div>
   );

@@ -1,0 +1,77 @@
+services:
+
+  frontend:
+    container_name: ecommerce-frontend
+    build: ./frontEnd
+    ports:
+      - "8080:8080"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
+
+  backend:
+    container_name: ecommerce-backend
+    build: ./backEnd
+    env_file:
+      - ./backEnd/.env
+    ports:
+      - "80:3002"
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+  db:
+    image: postgres:17-alpine
+    container_name: postgres_db
+    restart: always
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 25092007dy
+      POSTGRES_DB: ecommercewebsite
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ecommercewebsite"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  seed:
+    image: postgres:17-alpine
+    container_name: ecommerce-seed
+
+    depends_on:
+      backend:
+        condition: service_started
+
+    environment:
+      PGPASSWORD: 25092007dy
+
+    volumes:
+      - ./database/init.sql:/seed/init.sql:ro
+
+    command: >
+      sh -c "
+      until pg_isready -h db -U postgres -d ecommercewebsite;
+      do
+        echo 'Waiting for PostgreSQL...';
+        sleep 2;
+      done;
+      echo 'Waiting for backend tables...';
+      sleep 10;
+      echo 'Running database seed...';
+      psql -h db -U postgres -d ecommercewebsite -f /seed/init.sql;
+      echo 'Database seed completed.';
+      "
+
+    restart: "no"
+
+
+volumes:
+  postgres_data:
