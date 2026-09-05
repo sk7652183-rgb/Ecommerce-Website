@@ -315,11 +315,60 @@ volumes:
   postgres_data:
 ```
 
-> ⚠️ **Note:** The password shown above (`25092007dy`) is a placeholder from the original setup. See [Section 14 — Security](#14-security) for how to externalise credentials properly.
+> ⚠️ **Note:** The password shown above (`25092007dy`) is a placeholder from the original setup. See [Section 15 — Security](#15-security) for how to externalise credentials properly.
 
 ---
 
-## 7. 🧩 Service Breakdown
+## 7. 🚫 Docker Ignore Files
+
+`.dockerignore` files keep unnecessary and sensitive files out of the Docker build context, resulting in smaller, faster, and more secure image builds.
+
+**`backEnd/.dockerignore`:**
+
+```text
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+.github
+dist
+coverage
+*.log
+Dockerfile
+.dockerignore
+README.md
+```
+
+**`frontEnd/.dockerignore`:**
+
+```text
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+.github
+Dockerfile
+.dockerignore
+coverage
+.nyc_output
+*.log
+logs
+README.md
+```
+
+---
+
+## 8. 🧩 Service Breakdown
 
 ### 7.1 🎨 Frontend
 - **Build context:** `./frontEnd`
@@ -358,7 +407,7 @@ ecommerce-seed    Exited (0)
 
 ---
 
-## 8. 🔄 Service Startup Flow
+## 9. 🔄 Service Startup Flow
 
 ```text
 PostgreSQL
@@ -378,7 +427,7 @@ Frontend
 
 ---
 
-## 9. 🔌 Port Configuration
+## 10. 🔌 Port Configuration
 
 | Service | Container Port | Host Port |
 |---|---:|---:|
@@ -396,7 +445,7 @@ API:       http://<EC2-PUBLIC-IP>/api/v1/
 
 ---
 
-## 10. 🔐 Environment Variables
+## 11. 🔐 Environment Variables
 
 **Backend** (`backEnd/.env`):
 
@@ -430,7 +479,7 @@ VITE_API_BASE_URL=http://52.38.59.15/api/v1/
 
 ---
 
-## 11. 💾 PostgreSQL Persistent Storage
+## 12. 💾 PostgreSQL Persistent Storage
 
 PostgreSQL data is persisted using a named Docker volume:
 
@@ -451,7 +500,7 @@ docker volume inspect postgres_data
 
 ---
 
-## 12. 🔑 Database Access
+## 13. 🔑 Database Access
 
 ```bash
 # Connect to PostgreSQL
@@ -471,7 +520,7 @@ docker exec -it postgres_db psql -U postgres -d ecommercewebsite
 
 ---
 
-## 13. ☁️ AWS EC2 Deployment
+## 14. ☁️ AWS EC2 Deployment
 
 ```bash
 # 1. Connect to the EC2 instance
@@ -614,7 +663,7 @@ docker exec ecommerce-frontend ls -lh /usr/share/nginx/html/profile.png
 
 ---
 
-## 14. 🔒 Security
+## 15. 🔒 Security
 
 The current configuration hard-codes the PostgreSQL password:
 
@@ -678,7 +727,7 @@ Additional production recommendations:
 
 ---
 
-## 15. 🌿 Git Workflow
+## 16. 🌿 Git Workflow
 
 The DevOps implementation lives on the `Devops` branch.
 
@@ -711,7 +760,7 @@ docker ps
 
 ---
 
-## 16. 🗺️ Deployment Flow Diagram
+## 17. 🗺️ Deployment Flow Diagram
 
 ```text
 Developer
@@ -748,7 +797,7 @@ Port 8080             Port 3002
 
 ---
 
-## 17. 🚀 Roadmap / Future Improvements
+## 18. 🚀 Roadmap / Future Improvements
 
 A natural next step is a full CI/CD pipeline:
 
@@ -786,13 +835,13 @@ Other planned enhancements:
 
 ---
 
-## 18. 🧠 Skills Demonstrated
+## 19. 🧠 Skills Demonstrated
 
 Docker · Docker Compose · Multi-stage Docker Builds · Docker Volumes · Docker Health Checks · Docker Networking · Non-root Containers · Nginx · React · Vite · Node.js · Express.js · PostgreSQL · Database Seeding · REST APIs · CORS · Environment Variables · Linux · AWS EC2 · Git · GitHub · 3-Tier Architecture · Container Troubleshooting · Application Deployment · Log Analysis · DevOps Workflow
 
 ---
 
-## 19. 📊 Project Status
+## 20. 📊 Project Status
 
 | Component | Status |
 |---|---|
@@ -811,7 +860,7 @@ Docker · Docker Compose · Multi-stage Docker Builds · Docker Volumes · Docke
 
 ---
 
-## 20. ⚡ Quick Start
+## 21. ⚡ Quick Start
 
 ```bash
 git clone <YOUR-GITHUB-REPOSITORY>
@@ -843,7 +892,7 @@ docker compose logs -f
 
 ---
 
-## 21. 👤 Author
+## 22. 👤 Author
 
 **Abusufiyan Khan**
 DevOps / Cloud / Infrastructure Project
