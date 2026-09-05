@@ -1,16 +1,18 @@
-# Ecommerce Website – DevOps Project
+# 🛒 Ecommerce Website — DevOps Project
 
-A full-stack Ecommerce Website containerised using Docker and Docker Compose and deployed on an AWS EC2 Ubuntu server.
+A containerised, full-stack Ecommerce Website built with 🐳 Docker and Docker Compose, and deployed to an ☁️ AWS EC2 (Ubuntu) instance.
 
-The application follows a **3-tier architecture** consisting of:
+The system follows a **three-tier architecture**:
 
-- React/Vite frontend
-- Node.js/Express backend
-- PostgreSQL 17 database
+- 🎨 **Frontend** — React + Vite
+- ⚙️ **Backend** — Node.js + Express
+- 🗄️ **Database** — PostgreSQL 17
 
-The project also includes multi-stage Docker builds, Nginx, PostgreSQL persistent storage, database seeding, Docker health checks, service dependencies, environment variables, and AWS EC2 deployment.
+The project demonstrates multi-stage Docker builds, Nginx as a static file server, persistent PostgreSQL storage, automated database seeding, container health checks, inter-service dependencies, environment-based configuration, and end-to-end deployment on AWS EC2.
 
-## Architecture
+---
+
+## 1. 🏗️ Architecture Overview
 
 ```text
                          Internet
@@ -45,23 +47,27 @@ The project also includes multi-stage Docker builds, Nginx, PostgreSQL persisten
         Browser
 ```
 
-## Technology Stack
+---
 
-| Component | Technology |
+## 2. 🧰 Technology Stack
+
+| Layer | Technology |
 |---|---|
 | Frontend | React |
 | Build Tool | Vite |
 | Web Server | Nginx |
-| Backend | Node.js 24 |
+| Backend Runtime | Node.js 24 |
 | API Framework | Express.js |
 | Database | PostgreSQL 17 |
 | Containerisation | Docker |
 | Orchestration | Docker Compose |
-| Cloud | AWS EC2 |
+| Cloud Platform | AWS EC2 |
 | Operating System | Ubuntu |
 | Version Control | Git / GitHub |
 
-## Project Structure
+---
+
+## 3. 📁 Project Structure
 
 ```text
 Ecommerce-Website/
@@ -90,9 +96,14 @@ Ecommerce-Website/
 └── README.md
 ```
 
-## Backend Dockerfile
+---
 
-The backend uses a **multi-stage Docker build**. The first stage uses `node:24-slim` to install dependencies and prepare the application. The second stage uses `node:24-alpine` as the final runtime image. The application runs using the non-root `node` user.
+## 4. ⚙️ Backend — Dockerfile
+
+The backend is built using a **two-stage Docker build**:
+
+1. **Builder stage** (`node:24-slim`) — installs dependencies and prepares the application source.
+2. **Runtime stage** (`node:24-alpine`) — a lightweight production image that runs as the non-root `node` user.
 
 ```dockerfile
 # ==========================================
@@ -144,23 +155,28 @@ EXPOSE 3002
 CMD ["npm", "run", "dev"]
 ```
 
-The backend container is `ecommerce-backend`.
-
-The backend listens on port `3002`. Docker Compose maps host port `80` to container port `3002`.
+📦 **Container name:** `ecommerce-backend`
+🔌 **Internal port:** `3002`
+🔀 **Host mapping:** `80 → 3002`
 
 ```text
 Host Port 80 → Container Port 3002
 ```
 
-Backend API:
+🌐 **Backend API endpoint:**
 
 ```text
 http://<EC2-PUBLIC-IP>/api/v1/
 ```
 
-## Frontend Dockerfile
+---
 
-The frontend uses a multi-stage Docker build. The first stage builds the React/Vite production assets. The second stage uses an unprivileged Nginx image to serve the static files.
+## 5. 🎨 Frontend — Dockerfile
+
+The frontend also uses a two-stage build:
+
+1. **Builder stage** (`node:24-slim`) — installs dependencies and produces the Vite production build, running as a non-root user throughout.
+2. **Runtime stage** (`nginxinc/nginx-unprivileged:1.27-alpine`) — serves the static assets via an unprivileged Nginx image.
 
 ```dockerfile
 # ==========================================
@@ -204,44 +220,20 @@ EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
 ```
 
-The frontend container is `ecommerce-frontend`.
-
-The production build is generated in:
-
-```text
-/app/dist
-```
-
-and copied to:
-
-```text
-/usr/share/nginx/html
-```
-
-The frontend is served on port `8080`.
+📦 **Container name:** `ecommerce-frontend`
+🏗️ **Build output:** `/app/dist` → copied to `/usr/share/nginx/html`
+🔌 **Served port:** `8080`
+🖥️ **Base image:** `nginxinc/nginx-unprivileged:1.27-alpine` (runs Nginx without root privileges)
 
 ```text
 http://<EC2-PUBLIC-IP>:8080
 ```
 
-The frontend uses:
+---
 
-```text
-nginxinc/nginx-unprivileged:1.27-alpine
-```
+## 6. 🐙 Docker Compose
 
-so Nginx runs without root privileges.
-
-## Docker Compose
-
-The application is managed using Docker Compose with four services:
-
-- `frontend`
-- `backend`
-- `db`
-- `seed`
-
-Complete `docker-compose.yml`:
+The stack is orchestrated with four services: `frontend`, `backend`, `db`, and `seed`.
 
 ```yaml
 services:
@@ -323,151 +315,50 @@ volumes:
   postgres_data:
 ```
 
-## Docker Services
+> ⚠️ **Note:** The password shown above (`25092007dy`) is a placeholder from the original setup. See [Section 14 — Security](#14-security) for how to externalise credentials properly.
 
-### Frontend
+---
 
-The frontend is built from:
+## 7. 🧩 Service Breakdown
 
-```text
-./frontEnd
-```
+### 7.1 🎨 Frontend
+- **Build context:** `./frontEnd`
+- **Container:** `ecommerce-frontend`
+- **Port mapping:** `8080:8080`
+- **Startup condition:** waits for the `seed` service to complete successfully.
 
-Container:
+### 7.2 ⚙️ Backend
+- **Build context:** `./backEnd`
+- **Container:** `ecommerce-backend`
+- **Environment file:** `./backEnd/.env`
+- **Port mapping:** `80:3002`
+- **Startup condition:** waits for PostgreSQL to report a healthy status.
 
-```text
-ecommerce-frontend
-```
+### 7.3 🗄️ PostgreSQL
+- **Image:** `postgres:17-alpine`
+- **Container:** `postgres_db`
+- **Database name:** `ecommercewebsite`
+- **User:** `postgres`
+- **Port:** `5432`
+- **Persistent storage:** Docker volume `postgres_data`, mounted at `/var/lib/postgresql/data`
 
-Port mapping:
-
-```text
-8080:8080
-```
-
-The frontend waits for the seed service to complete successfully.
-
-### Backend
-
-The backend is built from:
-
-```text
-./backEnd
-```
-
-Container:
-
-```text
-ecommerce-backend
-```
-
-Environment variables are loaded from:
-
-```text
-./backEnd/.env
-```
-
-Port mapping:
-
-```text
-80:3002
-```
-
-The backend waits for PostgreSQL to become healthy.
-
-### PostgreSQL
-
-PostgreSQL uses:
-
-```text
-postgres:17-alpine
-```
-
-Container:
-
-```text
-postgres_db
-```
-
-Database:
-
-```text
-ecommercewebsite
-```
-
-Database user:
-
-```text
-postgres
-```
-
-Port:
-
-```text
-5432
-```
-
-PostgreSQL data is stored in the Docker volume:
-
-```text
-postgres_data
-```
-
-mounted at:
-
-```text
-/var/lib/postgresql/data
-```
-
-### Database Seed
-
-The seed service uses:
-
-```text
-postgres:17-alpine
-```
-
-Container:
-
-```text
-ecommerce-seed
-```
-
-The SQL file:
-
-```text
-database/init.sql
-```
-
-is mounted as:
-
-```text
-/seed/init.sql
-```
-
-The file is mounted as read-only.
-
-The seed service waits for PostgreSQL using:
-
-```bash
-pg_isready -h db -U postgres -d ecommercewebsite
-```
-
-It then executes:
-
-```bash
-psql -h db -U postgres -d ecommercewebsite -f /seed/init.sql
-```
-
-After successful execution, the seed container exits with status `0`.
+### 7.4 🌱 Database Seed
+- **Image:** `postgres:17-alpine`
+- **Container:** `ecommerce-seed`
+- **Seed file:** `database/init.sql`, mounted read-only at `/seed/init.sql`
+- **Wait strategy:** polls the database using `pg_isready -h db -U postgres -d ecommercewebsite`
+- **Seed command:** `psql -h db -U postgres -d ecommercewebsite -f /seed/init.sql`
+- **Expected exit status:** `0` (a successful, one-time run)
 
 ```text
 ecommerce-seed    Exited (0)
 ```
 
-This is expected and indicates successful database seeding.
+✅ This exit status is expected and confirms the database was seeded correctly.
 
-## Service Startup Flow
+---
+
+## 8. 🔄 Service Startup Flow
 
 ```text
 PostgreSQL
@@ -485,7 +376,9 @@ Seed
 Frontend
 ```
 
-## Port Configuration
+---
+
+## 9. 🔌 Port Configuration
 
 | Service | Container Port | Host Port |
 |---|---:|---:|
@@ -493,28 +386,19 @@ Frontend
 | Backend | 3002 | 80 |
 | PostgreSQL | 5432 | 5432 |
 
-Application URLs:
+**Application URLs:**
 
 ```text
-Frontend:
-http://<EC2-PUBLIC-IP>:8080
-
-Backend:
-http://<EC2-PUBLIC-IP>
-
-API:
-http://<EC2-PUBLIC-IP>/api/v1/
+Frontend:  http://<EC2-PUBLIC-IP>:8080
+Backend:   http://<EC2-PUBLIC-IP>
+API:       http://<EC2-PUBLIC-IP>/api/v1/
 ```
 
-## Environment Variables
+---
 
-Backend environment file:
+## 10. 🔐 Environment Variables
 
-```text
-backEnd/.env
-```
-
-Example:
+**Backend** (`backEnd/.env`):
 
 ```env
 PORT=3002
@@ -525,13 +409,7 @@ DB_USER=postgres
 DB_PASSWORD=<YOUR_DATABASE_PASSWORD>
 ```
 
-Frontend environment file:
-
-```text
-frontEnd/.env
-```
-
-Example:
+**Frontend** (`frontEnd/.env`):
 
 ```env
 VITE_API_BASE_URL=http://<EC2-PUBLIC-IP>/api/v1/
@@ -543,97 +421,73 @@ Example:
 VITE_API_BASE_URL=http://52.38.59.15/api/v1/
 ```
 
-After changing the frontend `.env`, rebuild the frontend:
+> After updating the frontend `.env`, rebuild the frontend image so Vite bakes in the new value:
+>
+> ```bash
+> docker compose build --no-cache frontend
+> docker compose up -d frontend
+> ```
 
-```bash
-docker compose build --no-cache frontend
-docker compose up -d frontend
-```
+---
 
-## PostgreSQL Persistent Storage
+## 11. 💾 PostgreSQL Persistent Storage
 
-PostgreSQL uses a named Docker volume:
+PostgreSQL data is persisted using a named Docker volume:
 
 ```yaml
 volumes:
   postgres_data:
 ```
 
-The volume is mounted at:
-
-```text
-/var/lib/postgresql/data
-```
-
-List Docker volumes:
+Mounted at `/var/lib/postgresql/data`, this volume ensures data survives container restarts and recreations.
 
 ```bash
+# List all Docker volumes
 docker volume ls
-```
 
-Inspect the volume:
-
-```bash
+# Inspect the volume
 docker volume inspect postgres_data
 ```
 
-The volume keeps PostgreSQL data persistent when containers are restarted or recreated.
+---
 
-## Database Access
-
-Connect to PostgreSQL:
+## 12. 🔑 Database Access
 
 ```bash
+# Connect to PostgreSQL
 docker exec -it postgres_db psql -U postgres -d ecommercewebsite
 ```
 
-List databases:
-
 ```sql
+-- List databases
 \l
-```
 
-List tables:
-
-```sql
+-- List tables
 \dt
-```
 
-Exit PostgreSQL:
-
-```sql
+-- Exit
 \q
 ```
 
-## AWS EC2 Deployment
+---
 
-The application is designed to run on an AWS EC2 Ubuntu instance.
-
-Connect to EC2:
+## 13. ☁️ AWS EC2 Deployment
 
 ```bash
+# 1. Connect to the EC2 instance
 ssh -i <key.pem> ubuntu@<EC2-PUBLIC-IP>
-```
 
-Clone the repository:
-
-```bash
+# 2. Clone the repository
 git clone <YOUR-GITHUB-REPOSITORY>
-```
 
-Navigate to the project:
-
-```bash
+# 3. Navigate into the project
 cd Ecommerce-Website/Ecommerce-Website
-```
 
-Verify the files:
-
-```bash
+# 4. Verify the expected files are present
 ls
 ```
 
-Expected:
+Expected output:
 
 ```text
 backEnd
@@ -643,69 +497,36 @@ docker-compose.yml
 README.md
 ```
 
-Build the Docker images:
-
 ```bash
+# 5. Build the images
 docker compose build
-```
 
-Start the application:
-
-```bash
+# 6. Start the stack
 docker compose up -d
-```
 
-Check running containers:
-
-```bash
+# 7. Verify running containers
 docker ps
-```
 
-Check all containers:
-
-```bash
+# Or view all containers, including stopped ones
 docker ps -a
 ```
 
-## Docker Logs
-
-Frontend logs:
+### 13.1 📜 Viewing Logs
 
 ```bash
 docker logs ecommerce-frontend
-```
-
-Backend logs:
-
-```bash
 docker logs ecommerce-backend
-```
-
-PostgreSQL logs:
-
-```bash
 docker logs postgres_db
-```
-
-Seed logs:
-
-```bash
 docker logs ecommerce-seed
-```
 
-Follow backend logs:
-
-```bash
+# Follow a single service
 docker logs -f ecommerce-backend
-```
 
-Follow all Compose logs:
-
-```bash
+# Follow all services
 docker compose logs -f
 ```
 
-Expected backend logs:
+**Expected backend logs:**
 
 ```text
 SERVER IS LISTENING ON PORT: 3002
@@ -713,101 +534,43 @@ DATABASE CONNECTED!
 DATABASE MODEL SYNCED!
 ```
 
-Expected seed log:
+**Expected seed log:**
 
 ```text
 Database seed completed.
 ```
 
-## Docker Commands
-
-Build:
+### 13.2 🛠️ Common Docker Commands
 
 ```bash
+# Build / rebuild
 docker compose build
-```
-
-Build without cache:
-
-```bash
 docker compose build --no-cache
-```
 
-Start:
-
-```bash
+# Start / stop / restart
 docker compose up -d
-```
-
-Stop:
-
-```bash
 docker compose down
-```
-
-Restart:
-
-```bash
 docker compose restart
-```
 
-View logs:
-
-```bash
+# Logs
 docker compose logs
-```
-
-Follow logs:
-
-```bash
 docker compose logs -f
-```
 
-View containers:
-
-```bash
+# Inspect state
 docker ps
-```
-
-View all containers:
-
-```bash
 docker ps -a
-```
-
-List images:
-
-```bash
 docker images
-```
-
-List volumes:
-
-```bash
 docker volume ls
-```
 
-Enter frontend container:
-
-```bash
+# Shell into a running container
 docker exec -it ecommerce-frontend sh
-```
-
-Enter backend container:
-
-```bash
 docker exec -it ecommerce-backend sh
-```
-
-Enter PostgreSQL container:
-
-```bash
 docker exec -it postgres_db sh
 ```
 
-## Complete Rebuild
+### 13.3 🔁 Full Rebuilds
 
-For a normal clean rebuild:
+**Standard rebuild (keeps the database):**
 
 ```bash
 docker compose down
@@ -815,7 +578,7 @@ docker compose build --no-cache
 docker compose up -d
 ```
 
-For a complete reset including PostgreSQL data:
+**Full reset (wipes the database):**
 
 ```bash
 docker compose down -v
@@ -823,174 +586,43 @@ docker compose build --no-cache
 docker compose up -d
 ```
 
-> **Warning:** `docker compose down -v` deletes the PostgreSQL Docker volume and therefore removes the existing database data.
+> ⚠️ **Warning:** `docker compose down -v` removes the `postgres_data` volume along with all existing database records. Use a plain `docker compose down` if the data needs to be preserved.
 
-Use `docker compose down` when you want to keep the database.
+### 13.4 🩹 Frontend Troubleshooting
 
-## Frontend Troubleshooting
+If the browser continues to display outdated content after a rebuild, it is most likely serving a cached JavaScript bundle.
 
-If the browser continues to show old frontend information after rebuilding the Docker container, the browser may be using cached JavaScript files.
+- **Hard refresh:** `Ctrl + Shift + R`
+- **Clear site data:** Chrome DevTools → Application → Storage → Clear site data
+- Alternatively, test in an **Incognito window**
 
-Perform a hard refresh:
-
-```text
-Ctrl + Shift + R
-```
-
-Alternatively:
-
-```text
-Chrome DevTools
-→ Application
-→ Storage
-→ Clear site data
-```
-
-The application can also be tested using an Incognito window.
-
-Check whether an old IP exists in the built frontend:
+Diagnostic checks:
 
 ```bash
+# Check whether an old/stale IP is still baked into the frontend build
 docker exec ecommerce-frontend sh -c 'grep -Rni "32.185.191.155" /usr/share/nginx/html 2>/dev/null | head'
-```
 
-Check the current IP:
-
-```bash
+# Confirm the current IP is present
 docker exec ecommerce-frontend sh -c 'grep -Rni "<EC2-PUBLIC-IP>" /usr/share/nginx/html 2>/dev/null | head'
-```
 
-Check the profile information:
-
-```bash
+# Confirm profile content was bundled correctly
 docker exec ecommerce-frontend sh -c 'grep -Rni "Abusufiyan" /usr/share/nginx/html 2>/dev/null | head'
-```
 
-Check the profile image:
-
-```bash
+# Confirm the profile image was copied into the image
 docker exec ecommerce-frontend ls -lh /usr/share/nginx/html/profile.png
 ```
 
-## Profile Information
+---
 
-The application profile has been configured with:
+## 14. 🔒 Security
 
-```text
-Name: Abusufiyan
-Username: Abusufiyankhan
-Date of Birth: 18/09/1997
-Email: abusufiyan730@gmail.com
-Phone: 7738901810
-Location: Mumbai
-Address: Sakinaka Mumbai - 400072
-State: Maharashtra
-Country: India
-ZIP Code: 400072
-```
-
-Profile image:
-
-```text
-frontEnd/public/profile.png
-```
-
-The image can be used in React:
-
-```jsx
-<img src="/profile.png" alt="Profile" />
-```
-
-## Git Workflow
-
-The DevOps implementation is maintained on the:
-
-```text
-Devops
-```
-
-branch.
-
-Switch to the branch:
-
-```bash
-git checkout Devops
-```
-
-Check status:
-
-```bash
-git status
-```
-
-Stage changes:
-
-```bash
-git add .
-```
-
-Commit changes:
-
-```bash
-git commit -m "Add Docker Compose configuration and database seed"
-```
-
-Push changes:
-
-```bash
-git push origin Devops
-```
-
-Pull the latest changes on EC2:
-
-```bash
-git pull origin Devops
-```
-
-Redeploy:
-
-```bash
-docker compose down
-docker compose build --no-cache
-docker compose up -d
-```
-
-Check:
-
-```bash
-docker ps
-```
-
-## AWS Security Group
-
-Typical inbound rules:
-
-| Type | Port | Purpose |
-|---|---:|---|
-| SSH | 22 | EC2 administration |
-| HTTP | 80 | Backend/API |
-| Custom TCP | 8080 | Frontend |
-
-For production environments:
-
-- Restrict SSH access to trusted IP addresses.
-- Do not expose PostgreSQL publicly.
-- Use HTTPS.
-- Use an Application Load Balancer.
-- Use a private database.
-- Use appropriate IAM permissions.
-
-## Security
-
-The current Docker Compose configuration contains the PostgreSQL password directly:
+The current configuration hard-codes the PostgreSQL password:
 
 ```yaml
 POSTGRES_PASSWORD: 25092007dy
 ```
 
-For a public GitHub repository or production environment, credentials should not be stored directly in `docker-compose.yml`.
-
-A better configuration is:
+This is **not** suitable for a public repository or production deployment. Secrets should be externalised, for example:
 
 ```yaml
 environment:
@@ -999,7 +631,7 @@ environment:
   POSTGRES_DB: ${POSTGRES_DB}
 ```
 
-The values can be stored in a secure environment file:
+with the actual values stored outside version control:
 
 ```env
 POSTGRES_USER=postgres
@@ -1007,7 +639,7 @@ POSTGRES_PASSWORD=<YOUR_PASSWORD>
 POSTGRES_DB=ecommercewebsite
 ```
 
-The `.env` files should be excluded from Git:
+`.env` files should always be excluded from Git:
 
 ```gitignore
 .env
@@ -1016,19 +648,70 @@ node_modules/
 dist/
 ```
 
-For production, consider:
+**Recommended hardening for production:**
 
-- AWS Secrets Manager
-- IAM least-privilege permissions
-- HTTPS/TLS
-- Application Load Balancer
-- Amazon RDS for PostgreSQL
-- Docker image scanning
-- Dependency scanning
-- Secret scanning
-- CloudWatch monitoring
+- AWS Secrets Manager for credential storage
+- IAM least-privilege access policies
+- HTTPS/TLS termination
+- An Application Load Balancer in front of the services
+- Amazon RDS instead of a self-managed PostgreSQL container
+- Docker image and dependency vulnerability scanning
+- Git secret scanning
+- CloudWatch monitoring and alerting
 
-## DevOps Deployment Flow
+**AWS Security Group — typical inbound rules:**
+
+| Type | Port | Purpose |
+|---|---:|---|
+| SSH | 22 | EC2 administration |
+| HTTP | 80 | Backend / API |
+| Custom TCP | 8080 | Frontend |
+
+Additional production recommendations:
+
+- Restrict SSH access to trusted IP ranges only
+- Never expose PostgreSQL (port 5432) publicly
+- Enforce HTTPS
+- Use an Application Load Balancer
+- Keep the database private, inside a VPC
+- Apply least-privilege IAM roles
+
+---
+
+## 15. 🌿 Git Workflow
+
+The DevOps implementation lives on the `Devops` branch.
+
+```bash
+# Switch branches
+git checkout Devops
+
+# Check status
+git status
+
+# Stage and commit
+git add .
+git commit -m "Add Docker Compose configuration and database seed"
+
+# Push
+git push origin Devops
+```
+
+**Redeploying on EC2 after a push:**
+
+```bash
+git pull origin Devops
+
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+
+docker ps
+```
+
+---
+
+## 16. 🗺️ Deployment Flow Diagram
 
 ```text
 Developer
@@ -1063,9 +746,11 @@ Port 8080             Port 3002
                         init.sql
 ```
 
-## Future Improvements
+---
 
-The project can be extended with a complete CI/CD pipeline:
+## 17. 🚀 Roadmap / Future Improvements
+
+A natural next step is a full CI/CD pipeline:
 
 ```text
 GitHub
@@ -1085,81 +770,55 @@ Amazon ECR
 AWS Deployment
 ```
 
-Additional DevOps improvements can include:
+Other planned enhancements:
 
 - Terraform for Infrastructure as Code
-- Amazon ECR for Docker images
-- Amazon RDS for PostgreSQL
+- Amazon ECR for image storage
+- Amazon RDS for a managed PostgreSQL instance
 - Application Load Balancer
 - HTTPS/SSL
 - AWS CloudWatch
-- Prometheus
-- Grafana
-- Trivy
-- SonarQube
+- Prometheus + Grafana for monitoring
+- Trivy for container scanning
+- SonarQube for code quality
 - AWS Secrets Manager
-- Kubernetes
-- Amazon EKS
+- Kubernetes / Amazon EKS
 
-## DevOps Skills Demonstrated
+---
 
-```text
-Docker
-Docker Compose
-Multi-stage Docker Builds
-Docker Volumes
-Docker Health Checks
-Docker Networking
-Non-root Containers
-Nginx
-React
-Vite
-Node.js
-Express.js
-PostgreSQL
-Database Seeding
-REST APIs
-CORS
-Environment Variables
-Linux
-AWS EC2
-Git
-GitHub
-3-Tier Architecture
-Container Troubleshooting
-Application Deployment
-Log Analysis
-DevOps Workflow
-```
+## 18. 🧠 Skills Demonstrated
 
-## Project Status
+Docker · Docker Compose · Multi-stage Docker Builds · Docker Volumes · Docker Health Checks · Docker Networking · Non-root Containers · Nginx · React · Vite · Node.js · Express.js · PostgreSQL · Database Seeding · REST APIs · CORS · Environment Variables · Linux · AWS EC2 · Git · GitHub · 3-Tier Architecture · Container Troubleshooting · Application Deployment · Log Analysis · DevOps Workflow
 
-```text
-Frontend             ✅
-Backend              ✅
-PostgreSQL           ✅
-Database Seed        ✅
-Docker               ✅
-Docker Compose       ✅
-Multi-stage Builds   ✅
-Non-root Containers  ✅
-Nginx                ✅
-AWS EC2              ✅
-3-Tier Architecture  ✅
-Git DevOps Branch    ✅
-```
+---
 
-## Quick Start
+## 19. 📊 Project Status
+
+| Component | Status |
+|---|---|
+| Frontend | ✅ |
+| Backend | ✅ |
+| PostgreSQL | ✅ |
+| Database Seed | ✅ |
+| Docker | ✅ |
+| Docker Compose | ✅ |
+| Multi-stage Builds | ✅ |
+| Non-root Containers | ✅ |
+| Nginx | ✅ |
+| AWS EC2 | ✅ |
+| 3-Tier Architecture | ✅ |
+| Git DevOps Branch | ✅ |
+
+---
+
+## 20. ⚡ Quick Start
 
 ```bash
 git clone <YOUR-GITHUB-REPOSITORY>
-
 cd Ecommerce-Website/Ecommerce-Website
 
 docker compose build
-
 docker compose up -d
-
 docker ps
 ```
 
@@ -1169,28 +828,30 @@ Open the application:
 http://<EC2-PUBLIC-IP>:8080
 ```
 
-For redeployment:
+**Redeployment:**
 
 ```bash
 git pull origin Devops
 
 docker compose down
-
 docker compose build --no-cache
-
 docker compose up -d
 
 docker ps
-
 docker compose logs -f
 ```
 
-## Developer
+---
+
+## 21. 👤 Author
 
 **Abusufiyan Khan**
-
 DevOps / Cloud / Infrastructure Project
+
+📬 **Contact:**
+- ✉️ Email: abusufiyan730@gmail.com
+- 📍 Location: Sakinaka, Mumbai, Maharashtra, India — 400072
 
 ---
 
-**Built with React • Vite • Node.js • Express • PostgreSQL • Docker • Docker Compose • Nginx • AWS EC2**
+**Built with:** React • Vite • Node.js • Express • PostgreSQL • Docker • Docker Compose • Nginx • AWS EC2
