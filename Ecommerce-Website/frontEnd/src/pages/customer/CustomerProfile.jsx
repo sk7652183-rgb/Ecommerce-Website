@@ -45,7 +45,7 @@ ChartJS.register(
 function CustomerProfile() {
   const [showOrderItem, setShowOrderItem] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
-  const {logout} = useAuth();
+  const { logout } = useAuth();
 
   const sampleItem = {
     asin: "1233234",
@@ -88,12 +88,13 @@ function CustomerProfile() {
         data: [150, 200, 250, 180, 220, 300],
         borderColor: "#40916c",
         backgroundColor: "#1b4332",
-        tension: 0.3, // smooth curve
+        tension: 0.3,
         fill: true,
         pointBackgroundColor: "#081c15",
       },
     ],
   };
+
   const lineOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -111,20 +112,21 @@ function CustomerProfile() {
       },
     },
   };
+
   const profileInfo = {
-    first_name: "Alice",
-    last_name: "Johnson",
-    username: "alicej",
-    email: "alice.johnson@example.com",
-    phone_number: "012-345-678",
-    address_line1: "123 Main Street",
-    address_line2: "Apt 4B",
-    gender: "female",
-    birthdate: new Date("1995-06-15"), // IMPORTANT: use Date object, not string
-    country: { value: "US", label: "United States" }, // for react-select
-    state: "California",
-    city: "Los Angeles",
-    zipcode: "90001",
+    first_name: "Abusufiyan",
+    last_name: "",
+    username: "Abusufiyankhan",
+    email: "abusufiyan730@gmail.com",
+    phone_number: "7738901810",
+    address_line1: "Sakinaka Mumbai - 400072",
+    address_line2: "Sakinaka Mumbai - 400072",
+    gender: "male",
+    birthdate: new Date("1997-09-18"),
+    country: { value: "IN", label: "India" },
+    state: "Maharashtra",
+    city: "Mumbai",
+    zipcode: "400072",
   };
 
   return (
@@ -134,10 +136,12 @@ function CustomerProfile() {
         onClose={() => setShowEdit(false)}
         profileInfo={profileInfo}
       />
+
       <aside className="sidebar">
         <div className="log-out" onClick={logout}>
           <FontAwesomeIcon icon={faRightFromBracket} />
         </div>
+
         <div
           className="edit-user-info"
           title="Edit Your Info"
@@ -145,42 +149,53 @@ function CustomerProfile() {
         >
           <FontAwesomeIcon icon={faUserPen} />
         </div>
+
         <div className="avatar">
           <img
             src="https://images.unsplash.com/photo-1511367461989-f85a21fda167?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D"
             alt="Profile"
           />
         </div>
-        <h2 title="Full Name">Mr. Pol Pot</h2>
-        <h3 title="Username">@polpotprime007</h3>
+
+        <h2 title="Full Name">Abusufiyan</h2>
+
+        <h3 title="Username">@Abusufiyankhan</h3>
+
         <p className="dob" title="Birthdate">
-          1907-07-07 (69)
+          18/09/1997 (28)
         </p>
+
         <ul className="info">
           <li title="Email">
-            <FontAwesomeIcon icon={faEnvelope} /> phalsovandy007@gmail.com
+            <FontAwesomeIcon icon={faEnvelope} /> abusufiyan730@gmail.com
           </li>
+
           <li title="Phone">
-            <FontAwesomeIcon icon={faPhone} /> 0967273000
+            <FontAwesomeIcon icon={faPhone} /> 7738901810
           </li>
+
           <li title="Address Line 1">
-            <FontAwesomeIcon icon={faLocationDot} /> SihanoukVille, Ek reach
-            Street
+            <FontAwesomeIcon icon={faLocationDot} /> Sakinaka Mumbai - 400072
           </li>
+
           <li title="Address Line 2">
-            <FontAwesomeIcon icon={faLocationDot} /> House No.123
+            <FontAwesomeIcon icon={faLocationDot} /> Sakinaka Mumbai - 400072
           </li>
+
           <li title="Country">
-            <FontAwesomeIcon icon={faGlobe} /> North Korea
+            <FontAwesomeIcon icon={faGlobe} /> India
           </li>
+
           <li title="State">
-            <FontAwesomeIcon icon={faHouseFlag} /> Pyongyang
+            <FontAwesomeIcon icon={faHouseFlag} /> Maharashtra
           </li>
+
           <li title="City">
-            <FontAwesomeIcon icon={faTreeCity} /> Pyongyang City
+            <FontAwesomeIcon icon={faTreeCity} /> Mumbai
           </li>
+
           <li title="ZIP Code">
-            <FontAwesomeIcon icon={faMapLocationDot} /> 12345-DIKH
+            <FontAwesomeIcon icon={faMapLocationDot} /> 400072
           </li>
         </ul>
       </aside>
@@ -188,18 +203,27 @@ function CustomerProfile() {
       <main className="main">
         <section className="stats">
           <div className="stat-box">
-            <Doughnut data={boughtProduct} options={{ cutout: "65%" }} />
+            <Doughnut
+              data={boughtProduct}
+              options={{ cutout: "65%" }}
+            />
+
             <h3>Order By Category Stats</h3>
+
             <p>
               <strong>Total:</strong> 10,365 orders
             </p>
           </div>
+
           <div className="stat-box">
             <Line data={lineData} options={lineOptions} />
+
             <h3>Total Expenditure</h3>
+
             <p>
               <strong>Total:</strong> $22099
             </p>
+
             <p>
               <strong>Average Spent:</strong> $61
             </p>
@@ -209,6 +233,7 @@ function CustomerProfile() {
         <section className="profile-stats">
           <div className="table-title">
             <h3>Your Orders History</h3>
+
             <div className="table-title-right">
               <div>
                 <h4>
@@ -217,6 +242,7 @@ function CustomerProfile() {
                   </span>
                   Status
                 </h4>
+
                 <select defaultValue={"date"}>
                   <option value="delivered">Delivered</option>
                   <option value="cancelled">Cancelled</option>
@@ -224,6 +250,7 @@ function CustomerProfile() {
                   <option value="shipping">Shipping</option>
                 </select>
               </div>
+
               <div>
                 <h4>
                   <span>
@@ -231,11 +258,13 @@ function CustomerProfile() {
                   </span>
                   Sorting
                 </h4>
+
                 <select defaultValue={"date"}>
                   <option value="date">Sort By Order Date</option>
                   <option value="price">Sort By Order Price</option>
                 </select>
               </div>
+
               <div>
                 <h4>
                   <span>
@@ -243,6 +272,7 @@ function CustomerProfile() {
                   </span>
                   Sorting Order
                 </h4>
+
                 <select defaultValue={"ascending"}>
                   <option value="descending">Ascending Order</option>
                   <option value="ascending">Descending Order</option>
@@ -250,6 +280,7 @@ function CustomerProfile() {
               </div>
             </div>
           </div>
+
           <div className="table-wrapper">
             <table>
               <thead>
@@ -263,6 +294,7 @@ function CustomerProfile() {
                   <th>Delivery Option</th>
                 </tr>
               </thead>
+
               <tbody>
                 <tr>
                   <td>93e32377DDD</td>
@@ -278,6 +310,7 @@ function CustomerProfile() {
                     </button>
                   </td>
                 </tr>
+
                 <tr>
                   <td>93e32377DDD</td>
                   <td>10332291</td>
@@ -292,6 +325,7 @@ function CustomerProfile() {
                     </button>
                   </td>
                 </tr>
+
                 <tr>
                   <td>93e32377DDD</td>
                   <td>3323042</td>
@@ -306,6 +340,7 @@ function CustomerProfile() {
                     </button>
                   </td>
                 </tr>
+
                 <tr>
                   <td>93e32377DDD</td>
                   <td>3323042</td>
@@ -359,11 +394,14 @@ function OrderItem({ product }) {
   return (
     <div className="order-item" key={product.asin}>
       <p>{product.asin}</p>
+
       <div className="item-image">
         <img src={product.image_url} alt={product.title}></img>
       </div>
+
       <div className="item-details">
         <h2>{product.title}</h2>
+
         <p className="product-categories">
           {product.categories
             .slice(
@@ -372,11 +410,14 @@ function OrderItem({ product }) {
             )
             .join(" | ")}
         </p>
+
         <h4>
           ${product.final_price} {product.currency}
         </h4>
       </div>
+
       <div className="ordered-item-quantity">{product.quantity}</div>
+
       <button className="item-buy-again" onClick={() => {}}>
         Buy Again
       </button>
